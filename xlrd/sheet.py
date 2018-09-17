@@ -332,6 +332,7 @@ class Sheet(BaseObject):
             self.put_cell = self.put_cell_ragged
         else:
             self.put_cell = self.put_cell_unragged
+        self.decompile_formulas = book.decompile_formulas
         self._xf_index_to_xl_type_map = book._xf_index_to_xl_type_map
         self.nrows = 0 # actual, including possibly empty cells
         self.ncols = 0
@@ -918,13 +919,14 @@ class Sheet(BaseObject):
                 else: # BIFF2
                     rowx, colx, cell_attr,  result_str, flags = local_unpack('<HH3s8sB', data[0:16])
                     xf_index =  self.fixed_BIFF2_xfindex(cell_attr, rowx, colx)
-                if blah_formulas: # testing formula dumper
-                    #### XXXX FIXME
-                    fprintf(self.logfile, "FORMULA: rowx=%d colx=%d\n", rowx, colx)
+                if self.decompile_formulas:
+                    if blah_formulas:
+                        fprintf(self.logfile, "FORMULA: rowx=%d colx=%d\n", rowx, colx)
                     fmlalen = local_unpack("<H", data[20:22])[0]
-                    decompile_formula(bk, data[22:], fmlalen, FMLA_TYPE_CELL,
-                        browx=rowx, bcolx=colx, blah=1, r1c1=r1c1)
-                if result_str[6:8] == b"\xFF\xFF":
+                    d = decompile_formula(bk, data[22:], fmlalen, FMLA_TYPE_CELL,
+                        browx=rowx, bcolx=colx, blah=blah_formulas, r1c1=r1c1)
+                    self_put_cell(rowx, colx, XL_CELL_TEXT, d, xf_index)
+                elif result_str[6:8] == b"\xFF\xFF":
                     first_byte = BYTES_ORD(result_str[0])
                     if first_byte == 0:
                         # need to read next record (STRING)
