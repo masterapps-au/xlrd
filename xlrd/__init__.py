@@ -38,7 +38,8 @@ def open_workbook(filename=None,
                   encoding_override=None,
                   formatting_info=False,
                   on_demand=False,
-                  ragged_rows=False):
+                  ragged_rows=False,
+                  decompile_formulas=False):
     """
     Open a spreadsheet file for data extraction.
 
@@ -155,6 +156,7 @@ def open_workbook(filename=None,
         formatting_info=formatting_info,
         on_demand=on_demand,
         ragged_rows=ragged_rows,
+        decompile_formulas=decompile_formulas,
     )
     return bk
 
